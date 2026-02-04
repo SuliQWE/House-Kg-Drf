@@ -10,7 +10,8 @@ from .views import (
     ReviewListAPIView,
     RegisterView,
     LogoutView,
-    CustomLoginView
+    CustomLoginView,
+    PricePredict
 )
 
 # Роутер для ReviewViewSet
@@ -22,21 +23,14 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-
-    # Пользователи
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
-
-    # Review через viewset
     path('', include(router.urls)),
     path('review/', ReviewListAPIView.as_view(), name='review_list'),
-
-    # UserProfile
     path('userprofile/', UserProfileListAPIView.as_view(), name='userprofile_list'),
     path('userprofile/<int:pk>/', DetailUserProfileAPIView.as_view(), name='userprofile_detail'),
-
-    # Property
     path('property/', ListPropertyListAPIView.as_view(), name='property_list'),
     path('property/<int:pk>/', DetailPropertyListAPIView.as_view(), name='property_detail'),
+    path('price/', PricePredict.as_view(), name='predicted_price'),
 ]

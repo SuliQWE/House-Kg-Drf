@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics, status
+from rest_framework import viewsets, generics, status,views
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -11,14 +11,20 @@ from .serializers import (
     ReviewCreateSerializer,
     UserSerializer,
     LoginSerializer,
-    PropertyCreateSerializer
+    PropertyCreateSerializer,
+    HousePredictSerializer
 )
 from .models import UserProfile, Property, Review
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import PropertyFilter
 from .pagination import PropertyPagination
-from .permission import CreatePropertyPermission, CreateReviewPermission
+from .permission import CreatePropertyPermission
+import joblib
+from django.conf import settings
+import os
+
+
 
 
 class RegisterView(generics.CreateAPIView):
@@ -108,3 +114,38 @@ class ReviewListAPIView(generics.ListAPIView):
     def get_queryset(self):
         # Показываем все отзывы
         return Review.objects.all()
+
+model_path = os.path.join(settings.BASE_DIR, 'model.pkl')
+model = joblib.load(model_path)
+
+scaler_path = os.path.join(settings.BASE_DIR, 'scaler.pkl')
+scaler = joblib.load(scaler_path)
+
+neighborhoods = [
+    'Blueste', 'BrDale', 'BrkSide', 'ClearCr', 'CollgCr', 'Crawfor',
+    'Edwards', 'Gilbert', 'IDOTRR', 'MeadowV', 'Mitchel', 'NAmes',
+    'NPkVill', 'NWAmes', 'NoRidge', 'NridgHt', 'OldTown', 'SWISU',
+    'Sawyer', 'SawyerW', 'Somerst', 'StoneBr', 'Timber', 'Veenker'
+]
+
+class PricePredict(views.APIView):
+
+    def post(self, request):
+        serializer = HousePredictSerializer(data=request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+            new_neighborhood = data.get('Neighborhood')
+            neighborhood1or_0 = [1 if new_neighborhood == i else 0 for i in neighborhoods]
+
+            features = [data['GrLivArea'],
+                        data['YearBuilt'],
+                        data['GarageCars'],
+                        data['TotalBsmtSF'],
+                        data['FullBath'],
+                        data['OverallQual'],
+                        ] + neighborhood1or_0
+            scaled_data = scaler.transform([features])
+            predict = model.predict(scaled_data)[0]
+            house = serializer.save(predicted_price=round(predict))
+            return Response({'data': HousePredictSerializer(house).data}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

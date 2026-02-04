@@ -124,3 +124,13 @@ class Review(models.Model):
 
     def __str__(self):
         return f'{self.user.username}, {self.property.title}'
+
+class House(models.Model):
+    GrLivArea = models.IntegerField()
+    YearBuilt = models.IntegerField()
+    GarageCars = models.IntegerField()
+    TotalBsmtSF = models.IntegerField()
+    FullBath = models.IntegerField()
+    OverallQual = models.IntegerField()
+    Neighborhood = models.CharField(max_length=50)
+    predicted_price = models.FloatField(null=True, blank=True)

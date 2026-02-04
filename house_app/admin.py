@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import  (UserProfile,Property,PropertyImage,Review,Region,City,District)
+from .models import  (UserProfile,Property,PropertyImage,Review,Region,City,District,House)
 from modeltranslation.admin import TranslationAdmin, TranslationInlineModelAdmin
 
 class CityInline(admin.TabularInline,TranslationInlineModelAdmin):
@@ -54,4 +54,5 @@ admin.site.register(UserProfile)
 admin.site.register(PropertyImage)
 admin.site.register(Review)
 admin.site.register(District)
+admin.site.register(House)
 

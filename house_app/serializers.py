@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import (Property,PropertyImage,UserProfile,Region,Review,District,City)
+from .models import (Property,PropertyImage,UserProfile,Region,Review,District,City,House)
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 
@@ -103,4 +103,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         model = Review
         fields = '__all__'
 
-
+class HousePredictSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = House
+        fields = '__all__'
